@@ -65,8 +65,15 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
     },
   });
 
+
   const onSubmit = (data: AuthFormData) => {
     authMutation.mutate(data);
+  };
+
+  // Ensure button click always triggers submit
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    form.handleSubmit(onSubmit)();
   };
 
   return (
@@ -139,6 +146,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
             className="w-full floating-button"
             disabled={authMutation.isPending}
             data-testid="button-submit"
+            onClick={handleButtonClick}
           >
             {authMutation.isPending 
               ? (mode === "signin" ? "Signing In..." : "Creating Account...") 

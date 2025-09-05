@@ -91,11 +91,17 @@ export default function Navbar() {
               </DropdownMenu>
             ) : (
               <div className="flex items-center space-x-2">
-                <Link href="/auth">
-                  <Button className="floating-button" data-testid="button-signin">
-                    Sign In
-                  </Button>
-                </Link>
+                <Button 
+                  className="floating-button" 
+                  data-testid="button-signin"
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/auth';
+                    }
+                  }}
+                >
+                  Sign In
+                </Button>
               </div>
             )}
 
