@@ -115,7 +115,7 @@ export async function createPost(post: {
       content: post.content,
       excerpt: post.content.substring(0, 150) + '...',
       category: 'General',
-      published: false,
+  published: true,
     })
     .select()
     .single();
