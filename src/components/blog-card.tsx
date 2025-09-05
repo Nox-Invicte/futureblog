@@ -3,7 +3,7 @@ import { Heart, Share2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { likePost, unlikePost, getPostLikes, isPostLikedByUser, sharePost, getPostShares } from "../lib/api";
+// Like/share functionality is currently disabled (API not implemented)
 import { useAuthStore } from "../lib/auth";
 import { useToast } from "../hooks/use-toast";
 
@@ -26,84 +26,26 @@ export default function BlogCard({ post }: BlogCardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch like count and user's like status
-  const { data: likeCount = 0 } = useQuery({
-    queryKey: ['post-likes', post.id],
-    queryFn: () => getPostLikes(post.id),
-  });
 
-  const { data: isLiked = false } = useQuery({
-    queryKey: ['post-liked', post.id],
-    queryFn: () => isPostLikedByUser(post.id),
-    enabled: isAuthenticated,
-  });
-
-  // Fetch share count
-  const { data: shareCount = 0 } = useQuery({
-    queryKey: ['post-shares', post.id],
-    queryFn: () => getPostShares(post.id),
-  });
-
-  // Like/unlike mutation
-  const likeMutation = useMutation({
-    mutationFn: async () => {
-      if (isLiked) {
-        await unlikePost(post.id);
-      } else {
-        await likePost(post.id);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['post-likes', post.id] });
-      queryClient.invalidateQueries({ queryKey: ['post-liked', post.id] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Share mutation
-  const shareMutation = useMutation({
-    mutationFn: () => sharePost(post.id, post.title),
-    onSuccess: () => {
-      // Invalidate share count query to update the UI
-      queryClient.invalidateQueries({ queryKey: ['post-shares', post.id] });
-      toast({
-        title: "Success",
-        description: "Post shared successfully!",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to share post",
-        variant: "destructive",
-      });
-    },
-  });
-
+  // Like/share handlers are disabled
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to like posts",
-        variant: "destructive",
-      });
-      return;
-    }
-    likeMutation.mutate();
+    toast({
+      title: "Not implemented",
+      description: "Like functionality is not available.",
+      variant: "destructive",
+    });
   };
 
   const handleShare = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    shareMutation.mutate();
+    toast({
+      title: "Not implemented",
+      description: "Share functionality is not available.",
+      variant: "destructive",
+    });
   };
 
   return (
@@ -138,25 +80,22 @@ export default function BlogCard({ post }: BlogCardProps) {
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`hover:text-primary ${isLiked ? 'text-red-500' : ''}`}
+            className="hover:text-primary"
             onClick={handleLike}
-            disabled={likeMutation.isPending}
             data-testid={`button-like-${post.id}`}
           >
-            <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-            <span className="ml-1 text-sm">{likeCount}</span>
+            <Heart className="h-4 w-4" />
+            <span className="ml-1 text-sm">0</span>
           </Button>
-          {/* Comments button removed */}
           <Button 
             variant="ghost" 
             size="sm" 
             className="hover:text-primary"
             onClick={handleShare}
-            disabled={shareMutation.isPending}
             data-testid={`button-share-${post.id}`}
           >
             <Share2 className="h-4 w-4" />
-            <span className="ml-1 text-sm">{shareCount}</span>
+            <span className="ml-1 text-sm">0</span>
           </Button>
         </div>
       </div>
