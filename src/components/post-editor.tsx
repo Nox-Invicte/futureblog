@@ -8,7 +8,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { useToast } from "../hooks/use-toast";
 import { createPost, updatePost } from "../lib/api";
-import { categories } from "./categories-section";
+import { categories } from "../components/categories-section";
 import { useAuthStore } from "../lib/auth";
 import { z } from "zod";
 

@@ -9,5 +9,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (error) return res.status(500).json({ message: error.message });
     res.json(data);
   }
-  // Add POST logic here if needed
+  if (req.method === 'POST') {
+    const { title, content, category } = req.body;
+    if (!title || !content || !category) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+    const { data, error } = await supabase.from('blog_posts').insert([
+      {
+        title,
+        content,
+        category,
+        published: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ]).select('*').single();
+    if (error) return res.status(500).json({ message: error.message });
+    res.status(201).json(data);
+  }
 }

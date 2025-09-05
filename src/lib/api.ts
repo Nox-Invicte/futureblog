@@ -33,19 +33,47 @@ export async function getPostById(id: string): Promise<BlogPostWithAuthor | null
   return await res.json();
 }
 
-// The following features require new API endpoints to be implemented in /api:
-// - getUserPosts
-// - createPost
-// - updatePost
-// - deletePost
-// - likePost
-// - unlikePost
-// - getPostLikes
-// - isPostLikedByUser
-// - addComment
-// - getPostComments
-// - sharePost
-// - getPostShares
-// - getUserStats
 
-// You can add fetch-based implementations here once the corresponding endpoints exist in /api.
+// Create a new post
+export async function createPost(data: { title: string; content: string; category: string }) {
+  const res = await fetch('/api/posts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to create post');
+  return await res.json();
+}
+
+// Update an existing post
+export async function updatePost(id: string, data: { title: string; content: string; category: string }) {
+  const res = await fetch(`/api/posts/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update post');
+  return await res.json();
+}
+
+// Fetch posts for a specific user
+export async function getUserPosts(userId: string): Promise<BlogPost[]> {
+  const res = await fetch(`/api/posts/user/${userId}`);
+  if (!res.ok) throw new Error('Failed to fetch user posts');
+  return await res.json();
+}
+
+// Delete a post
+export async function deletePost(id: string): Promise<void> {
+  const res = await fetch(`/api/posts/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete post');
+}
+
+// Fetch user stats
+export async function getUserStats(userId: string): Promise<{ totalPosts: number; totalShares: number; totalLikes: number }> {
+  const res = await fetch(`/api/userStats/${userId}`);
+  if (!res.ok) throw new Error('Failed to fetch user stats');
+  return await res.json();
+}
