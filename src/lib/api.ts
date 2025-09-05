@@ -1,5 +1,3 @@
-import { supabase } from './supabase';
-
 // Local type definitions
 
 export interface BlogPost {
@@ -8,8 +6,9 @@ export interface BlogPost {
   title: string;
   content: string;
   category: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
+  author?: any;
 }
 
 export interface BlogPostWithAuthor extends BlogPost {
@@ -21,42 +20,18 @@ export interface BlogPostWithAuthor extends BlogPost {
 }
 
 export async function getAllPosts(): Promise<BlogPostWithAuthor[]> {
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .eq('published', true)
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-
-  // Map the data to match our interface
-
-  const postsWithAuthors = data.map((post) => {
-    return {
-      id: post.id,
-      authorId: post.user_id,
-      title: post.title,
-      content: post.content,
-      category: post.category || 'General',
-      createdAt: new Date(post.created_at),
-      updatedAt: new Date(post.updated_at),
-      author: {
-        id: post.user_id,
-        name: post.author || 'Unknown Author',
-        avatar: null,
-      },
-    };
-  });
-
-  return postsWithAuthors;
+  const res = await fetch('/api/posts');
+  if (!res.ok) throw new Error('Failed to fetch posts');
+  const data = await res.json();
+  return data;
 }
 
 export async function getPostById(id: string): Promise<BlogPostWithAuthor | null> {
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .eq('id', id)
-    .single();
+  const res = await fetch(`/api/posts/${id}`);
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data;
+}
 
   if (error) {
     if (error.code === 'PGRST116') return null; // No rows found
