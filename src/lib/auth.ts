@@ -24,28 +24,36 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       setLoading: (isLoading) => set({ isLoading }),
       
+
       login: async (email: string, password: string) => {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw new Error(error.message);
-        
-        // Use the user from Supabase auth
-        if (data.user) {
-          set({ user: data.user, isAuthenticated: true });
+        set({ isLoading: true });
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw new Error(error.message);
+          if (data.user) {
+            set({ user: data.user, isAuthenticated: true });
+          }
+        } finally {
+          set({ isLoading: false });
         }
       },
-      
+
       signup: async (email: string, password: string, name: string) => {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { name }
+        set({ isLoading: true });
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: { name }
+            }
+          });
+          if (error) throw new Error(error.message);
+          if (data.user) {
+            set({ user: data.user, isAuthenticated: true });
           }
-        });
-        if (error) throw new Error(error.message);
-        
-        if (data.user) {
-          set({ user: data.user, isAuthenticated: true });
+        } finally {
+          set({ isLoading: false });
         }
       },
       
