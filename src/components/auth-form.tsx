@@ -59,7 +59,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
         title: "Success",
         description: mode === "signin" ? "Signed in successfully!" : "Account created successfully!",
       });
-      navigate("/dashboard");
+  navigate("/dashboard");
     },
     onError: (error: Error) => {
       toast({

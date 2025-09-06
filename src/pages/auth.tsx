@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getCurrentUser } from "../lib/auth";
+import { getCurrentUser, getSession } from "../lib/auth";
 import { useLocation } from "wouter";
 import AuthForm from "../components/auth-form";
 
@@ -8,8 +8,12 @@ export default function Auth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-    getCurrentUser().then(u => {
-      setIsAuthenticated(!!u);
+    Promise.all([getCurrentUser(), getSession()]).then(([u, session]) => {
+      // Debug logging
+      // eslint-disable-next-line no-console
+      console.debug('[AUTH PAGE] getCurrentUser:', u, 'getSession:', session);
+      // Only set authenticated if user and session are both valid
+      setIsAuthenticated(!!u && !!session);
       setIsLoading(false);
     });
   }, []);
@@ -17,7 +21,7 @@ export default function Auth() {
 
   // Redirect if already authenticated (using useEffect to avoid setState during render)
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
+    if (!isLoading && isAuthenticated) {
       navigate("/dashboard");
     }
   }, [isAuthenticated, isLoading, navigate]);
