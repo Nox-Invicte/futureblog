@@ -28,6 +28,12 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showEditor, setShowEditor] = useState(false);
+  const [editingPost, setEditingPost] = useState<BlogPost | undefined>();
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+
   React.useEffect(() => {
     getCurrentUser().then((u: User | null) => {
       setUser(u);
@@ -35,12 +41,14 @@ export default function Dashboard() {
       setIsAuthLoading(false);
     });
   }, []);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
-  const [showEditor, setShowEditor] = useState(false);
-  const [editingPost, setEditingPost] = useState<BlogPost | undefined>();
-  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      navigate("/auth");
+    }
+  }, [isAuthLoading, isAuthenticated, navigate]);
+
+  // ...existing code...
 
   // Show loading while checking authentication
   if (isAuthLoading) {
@@ -56,12 +64,6 @@ export default function Dashboard() {
     );
   }
 
-  // Redirect if not authenticated (in effect)
-  React.useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      navigate("/auth");
-    }
-  }, [isAuthLoading, isAuthenticated, navigate]);
   if (!isAuthenticated) {
     // Optionally show a spinner or nothing while redirecting
     return null;
