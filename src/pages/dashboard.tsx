@@ -27,10 +27,12 @@ export default function Dashboard() {
   const [, navigate] = useLocation();
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   React.useEffect(() => {
     getCurrentUser().then((u: User | null) => {
       setUser(u);
       setIsAuthenticated(!!u);
+      setIsAuthLoading(false);
     });
   }, []);
   const { toast } = useToast();
@@ -39,6 +41,20 @@ export default function Dashboard() {
   const [showEditor, setShowEditor] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | undefined>();
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+
+  // Show loading while checking authentication
+  if (isAuthLoading) {
+    return (
+      <main className="pt-20">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
