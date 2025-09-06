@@ -21,8 +21,8 @@ const authSchema = z.object({
 type AuthFormData = z.infer<typeof authSchema>;
 
 interface AuthFormProps {
-  mode: "sign-in" | "signup";
-  onModeChange: (mode: "sign-in" | "signup") => void;
+  mode: "signin" | "signup";
+  onModeChange: (mode: "signin" | "signup") => void;
 }
 
 export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
@@ -41,7 +41,8 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
 
   const authMutation = useMutation({
     mutationFn: async (data: AuthFormData) => {
-      if (mode === "sign-in") {
+      if (mode === "signin") {
+        console.log('[DEBUG] Sign in button clicked, sending sign in request', data);
         await login(data.email, data.password);
       } else {
         await signup(data.email, data.password, data.name || "");
@@ -50,7 +51,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: mode === "sign-in" ? "Signed in successfully!" : "Account created successfully!",
+        description: mode === "signin" ? "Signed in successfully!" : "Account created successfully!",
       });
       navigate("/dashboard");
     },
@@ -73,10 +74,10 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
     <Card className="glass-card w-full max-w-md mx-auto">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold text-foreground">
-          {mode === "sign-in" ? "Welcome Back" : "Create Account"}
+          {mode === "signin" ? "Welcome Back" : "Create Account"}
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          {mode === "sign-in" 
+          {mode === "signin" 
             ? "Sign in to your account to continue" 
             : "Join FutureBlogs and start sharing your stories"
           }
@@ -141,21 +142,21 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
             data-testid="button-submit"
           >
             {authMutation.isPending 
-              ? (mode === "sign-in" ? "sign-ing In..." : "Creating Account...") 
-              : (mode === "sign-in" ? "Sign In" : "Create Account")
+              ? (mode === "signin" ? "Signing In..." : "Creating Account...") 
+              : (mode === "signin" ? "Sign In" : "Create Account")
             }
           </Button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-muted-foreground text-sm">
-            {mode === "sign-in" ? "Don't have an account? " : "Already have an account? "}
+            {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
             <button 
-              onClick={() => onModeChange(mode === "sign-in" ? "signup" : "sign-in")}
+              onClick={() => onModeChange(mode === "signin" ? "signup" : "signin")}
               className="text-primary hover:text-primary/80 transition-smooth"
               data-testid="button-switch-mode"
             >
-              {mode === "sign-in" ? "Sign up" : "Sign in"}
+              {mode === "signin" ? "Sign up" : "Sign in"}
             </button>
           </p>
         </div>
