@@ -7,6 +7,7 @@ export interface BlogPost {
   authorId: string;
   title: string;
   content: string;
+  excerpt: string;
   category: string;
   createdAt: Date;
   updatedAt: Date;
@@ -40,6 +41,7 @@ export async function getAllPosts(): Promise<BlogPostWithAuthor[]> {
       category: post.category || 'General',
       createdAt: new Date(post.created_at),
       updatedAt: new Date(post.updated_at),
+      excerpt: post.excerpt,
       author: {
         id: post.user_id,
         name: post.author || 'Unknown Author',
@@ -68,6 +70,7 @@ export async function getPostById(id: string): Promise<BlogPostWithAuthor | null
     authorId: data.user_id,
     title: data.title,
     content: data.content,
+    excerpt: data.excerpt,
     category: data.category || 'General',
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
@@ -93,6 +96,7 @@ export async function getUserPosts(userId: string): Promise<BlogPost[]> {
     authorId: post.user_id,
     title: post.title,
     content: post.content,
+    excerpt: post.excerpt,
     category: post.category || 'General',
     createdAt: new Date(post.created_at),
     updatedAt: new Date(post.updated_at),
@@ -127,6 +131,7 @@ export async function createPost(post: {
     authorId: data.user_id,
     title: data.title,
     content: data.content,
+    excerpt: data.excerpt,
     category: data.category || 'General',
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
@@ -171,6 +176,7 @@ export async function updatePost(id: string, updates: {
     authorId: data.user_id,
     title: data.title,
     content: data.content,
+    excerpt: data.excerpt,
     category: data.category || 'General',
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),

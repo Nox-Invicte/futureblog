@@ -271,15 +271,12 @@ export default function Dashboard() {
                           {post.title}
                         </h3>
                       </div>
+                      <div className="mb-1 text-muted-foreground text-sm">
+                        {post.excerpt}
+                      </div>
                       <div>
                         <span data-testid={`post-date-${post.id}`}>
                           {new Date(post.createdAt).toLocaleDateString()}
-                        </span>
-                        <span style={{ marginLeft: 8 }}>
-                          📨 {post.shares ?? 0}
-                        </span>
-                        <span style={{ marginLeft: 8 }}>
-                          ❤️ {post.likes ?? 0}
                         </span>
                       </div>
                     </div>
