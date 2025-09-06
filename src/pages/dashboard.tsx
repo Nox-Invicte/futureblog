@@ -50,15 +50,8 @@ export default function Dashboard() {
 
   // ...existing code...
 
-  // Show loading while checking authentication
-  if (isAuthLoading) {
-    // Always call hooks, use enabled to control execution
-    const { data: posts, isLoading } = useQuery<BlogPost[]>({
-      queryKey: ["posts", "user", user?.id],
-      queryFn: () => getUserPosts(user!.id),
-      enabled: !!user?.id && isAuthenticated && !isAuthLoading,
-    });
 
+  // Show loading while checking authentication
   if (isAuthLoading) {
     return (
       <main className="pt-20">
@@ -70,7 +63,6 @@ export default function Dashboard() {
         </div>
       </main>
     );
-  }
   }
 
   if (!isAuthenticated) {
