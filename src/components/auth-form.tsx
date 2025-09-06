@@ -12,13 +12,23 @@ import { apiRequest } from "../lib/queryClient";
 import { login, signup, getCurrentUser } from "../lib/auth";
 import { useLocation } from "wouter";
 
-const authSchema = z.object({
+const signinSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  name: z.string().min(2, "Name must be at least 2 characters").optional(),
+  name: z.string().optional(),
 });
 
-type AuthFormData = z.infer<typeof authSchema>;
+const signupSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+});
+
+type AuthFormData = {
+  email: string;
+  password: string;
+  name?: string;
+};
 
 interface AuthFormProps {
   mode: "signin" | "signup";
@@ -30,7 +40,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
   const { toast } = useToast();
   
   const form = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
+    resolver: zodResolver(mode === "signup" ? signupSchema : signinSchema),
     defaultValues: {
       email: "",
       password: "",
