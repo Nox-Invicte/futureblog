@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,6 +38,11 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
     },
   });
 
+  // Reset form fields when mode changes to prevent duplicate/missing fields
+  React.useEffect(() => {
+    form.reset({ email: "", password: "", name: "" });
+  }, [mode]);
+
 
   const authMutation = useMutation({
     mutationFn: async (data: AuthFormData) => {
@@ -66,6 +71,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
 
 
   const onSubmit = (data: AuthFormData) => {
+    console.log('[DEBUG] onSubmit called', data);
     authMutation.mutate(data);
   };
 
