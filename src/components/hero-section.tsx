@@ -1,10 +1,14 @@
 import { Link } from "wouter";
 import { Button } from "../components/ui/button";
 import { Rocket, BookOpen } from "lucide-react";
-import { useAuthStore } from "../lib/auth";
+import React from "react";
+import { getCurrentUser } from "../lib/auth";
 
 export default function HeroSection() {
-  const { isAuthenticated } = useAuthStore();
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  React.useEffect(() => {
+    getCurrentUser().then(u => setIsAuthenticated(!!u));
+  }, []);
 
   return (
     <section className="relative py-20 overflow-hidden">

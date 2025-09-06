@@ -1,9 +1,10 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Search, Menu, User, PenTool, LogOut } from "lucide-react";
+import { Search, Menu, User as UserIcon, PenTool, LogOut } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { useAuthStore } from "../lib/auth";
+import { getCurrentUser, logout } from "../lib/auth";
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +16,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 
 export default function Navbar() {
   const [location] = useLocation();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const [user, setUser] = React.useState<SupabaseUser | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  React.useEffect(() => {
+  getCurrentUser().then((u: SupabaseUser | null) => {
+      setUser(u);
+      setIsAuthenticated(!!u);
+    });
+  }, []);
 
   return (
     <header className="fixed top-0 w-full z-50 nav-blur border-b border-border">
@@ -75,7 +83,7 @@ export default function Navbar() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard" data-testid="link-dashboard">
-                      <User className="mr-2 h-4 w-4" />
+                      <UserIcon className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>
                     </Link>
                   </DropdownMenuItem>
@@ -93,7 +101,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-2">
                 <Button 
                   className="floating-button" 
-                  data-testid="button-signin"
+                  data-testid="button-sign-in"
                   onClick={() => {
                     if (typeof window !== 'undefined') {
                       window.location.href = '/auth';

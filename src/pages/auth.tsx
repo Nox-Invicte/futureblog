@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
-import { useAuthStore } from "../lib/auth";
+import { getCurrentUser } from "../lib/auth";
 import { useLocation } from "wouter";
 import AuthForm from "../components/auth-form";
 
 export default function Auth() {
   const [, navigate] = useLocation();
-  const { isAuthenticated, isLoading } = useAuthStore();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    getCurrentUser().then(u => {
+      setIsAuthenticated(!!u);
+      setIsLoading(false);
+    });
+  }, []);
+  const [mode, setMode] = useState<"sign-in" | "signup">("sign-in");
 
   // Redirect if already authenticated (using useEffect to avoid setState during render)
   useEffect(() => {

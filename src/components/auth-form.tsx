@@ -9,7 +9,7 @@ import { Label } from "../components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
-import { useAuthStore } from "../lib/auth";
+import { login, signup, getCurrentUser } from "../lib/auth";
 import { useLocation } from "wouter";
 
 const authSchema = z.object({
@@ -21,13 +21,12 @@ const authSchema = z.object({
 type AuthFormData = z.infer<typeof authSchema>;
 
 interface AuthFormProps {
-  mode: "signin" | "signup";
-  onModeChange: (mode: "signin" | "signup") => void;
+  mode: "sign-in" | "signup";
+  onModeChange: (mode: "sign-in" | "signup") => void;
 }
 
 export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
   const [, navigate] = useLocation();
-  const { setUser } = useAuthStore();
   const { toast } = useToast();
   
   const form = useForm<AuthFormData>({
@@ -39,11 +38,10 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
     },
   });
 
-  const { login, signup } = useAuthStore();
 
   const authMutation = useMutation({
     mutationFn: async (data: AuthFormData) => {
-      if (mode === "signin") {
+      if (mode === "sign-in") {
         await login(data.email, data.password);
       } else {
         await signup(data.email, data.password, data.name || "");
@@ -52,7 +50,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: mode === "signin" ? "Signed in successfully!" : "Account created successfully!",
+        description: mode === "sign-in" ? "Signed in successfully!" : "Account created successfully!",
       });
       navigate("/dashboard");
     },
@@ -75,10 +73,10 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
     <Card className="glass-card w-full max-w-md mx-auto">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold text-foreground">
-          {mode === "signin" ? "Welcome Back" : "Create Account"}
+          {mode === "sign-in" ? "Welcome Back" : "Create Account"}
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          {mode === "signin" 
+          {mode === "sign-in" 
             ? "Sign in to your account to continue" 
             : "Join FutureBlogs and start sharing your stories"
           }
@@ -143,21 +141,21 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
             data-testid="button-submit"
           >
             {authMutation.isPending 
-              ? (mode === "signin" ? "Signing In..." : "Creating Account...") 
-              : (mode === "signin" ? "Sign In" : "Create Account")
+              ? (mode === "sign-in" ? "sign-ing In..." : "Creating Account...") 
+              : (mode === "sign-in" ? "Sign In" : "Create Account")
             }
           </Button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-muted-foreground text-sm">
-            {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
+            {mode === "sign-in" ? "Don't have an account? " : "Already have an account? "}
             <button 
-              onClick={() => onModeChange(mode === "signin" ? "signup" : "signin")}
+              onClick={() => onModeChange(mode === "sign-in" ? "signup" : "sign-in")}
               className="text-primary hover:text-primary/80 transition-smooth"
               data-testid="button-switch-mode"
             >
-              {mode === "signin" ? "Sign up" : "Sign in"}
+              {mode === "sign-in" ? "Sign up" : "Sign in"}
             </button>
           </p>
         </div>

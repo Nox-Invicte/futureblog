@@ -2,9 +2,11 @@ import { Link } from "wouter";
 import { Heart, Share2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import React from "react";
+import type { User } from '@supabase/supabase-js';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { likePost, unlikePost, getPostLikes, isPostLikedByUser, sharePost, getPostShares } from "../lib/api";
-import { useAuthStore } from "../lib/auth";
+import { getCurrentUser } from "../lib/auth";
 import { useToast } from "../hooks/use-toast";
 
 interface BlogCardProps {
@@ -20,13 +22,20 @@ interface BlogCardProps {
     };
   };
 }
-
-export default function BlogCard({ post }: BlogCardProps) {
-  const { user, isAuthenticated } = useAuthStore();
-  const { toast } = useToast();
+export function BlogCard({ post }: BlogCardProps) {
   const queryClient = useQueryClient();
+  const toast = useToast();
+  const [user, setUser] = React.useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  React.useEffect(() => {
+    getCurrentUser().then((u) => {
+      setUser(u as User | null);
+      setIsAuthenticated(!!u);
+    });
+  }, []);
 
-  // Fetch like count and user's like status
+
+  // Fetch like count
   const { data: likeCount = 0 } = useQuery({
     queryKey: ['post-likes', post.id],
     queryFn: () => getPostLikes(post.id),
@@ -58,7 +67,7 @@ export default function BlogCard({ post }: BlogCardProps) {
       queryClient.invalidateQueries({ queryKey: ['post-liked', post.id] });
     },
     onError: (error: Error) => {
-      toast({
+      toast.toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
@@ -72,13 +81,13 @@ export default function BlogCard({ post }: BlogCardProps) {
     onSuccess: () => {
       // Invalidate share count query to update the UI
       queryClient.invalidateQueries({ queryKey: ['post-shares', post.id] });
-      toast({
+      toast.toast({
         title: "Success",
         description: "Post shared successfully!",
       });
     },
     onError: () => {
-      toast({
+      toast.toast({
         title: "Error",
         description: "Failed to share post",
         variant: "destructive",
@@ -90,7 +99,7 @@ export default function BlogCard({ post }: BlogCardProps) {
     e.preventDefault();
     e.stopPropagation();
     if (!isAuthenticated) {
-      toast({
+      toast.toast({
         title: "Authentication Required",
         description: "Please sign in to like posts",
         variant: "destructive",

@@ -1,95 +1,37 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { supabase } from './supabase';
 import type { User } from '@supabase/supabase-js';
 
-interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  setUser: (user: User | null) => void;
-  setLoading: (loading: boolean) => void;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => Promise<void>;
-  initializeAuth: () => Promise<void>;
+
+// Simple auth module using Supabase directly
+export async function login(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+  return data.user;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      user: null,
-      isAuthenticated: false,
-      isLoading: true,
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
-      setLoading: (isLoading) => set({ isLoading }),
-      
+export async function signup(email: string, password: string, name: string) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { name },
+    },
+  });
+  if (error) throw new Error(error.message);
+  return data.user;
+}
 
-      login: async (email: string, password: string) => {
-        set({ isLoading: true });
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-          if (error) throw new Error(error.message);
-          if (data.user) {
-            set({ user: data.user, isAuthenticated: true });
-          }
-        } finally {
-          set({ isLoading: false });
-        }
-      },
+export async function logout() {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw new Error(error.message);
+}
 
-      signup: async (email: string, password: string, name: string) => {
-        set({ isLoading: true });
-        try {
-          const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              data: { name }
-            }
-          });
-          if (error) throw new Error(error.message);
-          if (data.user) {
-            set({ user: data.user, isAuthenticated: true });
-          }
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-      
-      logout: async () => {
-        await supabase.auth.signOut();
-        set({ user: null, isAuthenticated: false });
-      },
-      
-      initializeAuth: async () => {
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user) {
-            set({ user: session.user, isAuthenticated: true });
-          } else {
-            set({ user: null, isAuthenticated: false });
-          }
-        } catch (error) {
-          console.error('Auth initialization error:', error);
-          set({ user: null, isAuthenticated: false });
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-    }),
-    {
-      name: 'auth-storage',
-    }
-  )
-);
+export async function getCurrentUser() {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
 
-// Listen for auth state changes
-supabase.auth.onAuthStateChange((event, session) => {
-  const store = useAuthStore.getState();
-  if (session?.user) {
-    store.setUser(session.user);
-  } else {
-    store.setUser(null);
-  }
-});
+export async function getSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session;
+}

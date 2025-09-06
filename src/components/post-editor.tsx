@@ -9,7 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { useToast } from "../hooks/use-toast";
 import { createPost, updatePost } from "../lib/api";
 import { categories } from "./categories-section";
-import { useAuthStore } from "../lib/auth";
+import React from "react";
+import { getCurrentUser } from "../lib/auth";
+import type { User } from '@supabase/supabase-js';
 import { z } from "zod";
 
 
@@ -37,7 +39,10 @@ interface PostEditorProps {
 export default function PostEditor({ post, onSave, onCancel }: PostEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
+  const [user, setUser] = React.useState<User | null>(null);
+  React.useEffect(() => {
+    getCurrentUser().then((u: User | null) => setUser(u));
+  }, []);
 
 
   const form = useForm<EditorFormData>({

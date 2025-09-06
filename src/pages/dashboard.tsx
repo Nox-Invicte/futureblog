@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Plus, FileText, Share2, TrendingUp, Edit, Trash2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { useToast } from "../hooks/use-toast";
-import { useAuthStore } from "../lib/auth";
+import { getCurrentUser } from "../lib/auth";
+import type { User } from '@supabase/supabase-js';
 import { BlogPost } from "../lib/api";
 import PostEditor from "../components/post-editor";
 import { Link, useLocation } from "wouter";
@@ -24,7 +25,14 @@ import {
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
-  const { user, isAuthenticated } = useAuthStore();
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  React.useEffect(() => {
+    getCurrentUser().then((u: User | null) => {
+      setUser(u);
+      setIsAuthenticated(!!u);
+    });
+  }, []);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   

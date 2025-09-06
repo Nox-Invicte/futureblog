@@ -1,3 +1,4 @@
+import "../future-blogs/lib/dotenv-loader";
 import { type BlogPost, type InsertBlogPost, type UpdateBlogPost, type BlogPostWithAuthor } from "@shared/schema";
 import { createClient } from '@supabase/supabase-js';
 
