@@ -24,6 +24,7 @@ import {
 } from "../components/ui/alert-dialog";
 
 export default function Dashboard() {
+  // All hooks at the top level, always called in the same order
   const [, navigate] = useLocation();
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -34,42 +35,7 @@ export default function Dashboard() {
   const [editingPost, setEditingPost] = useState<BlogPost | undefined>();
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    getCurrentUser().then((u: User | null) => {
-      setUser(u);
-      setIsAuthenticated(!!u);
-      setIsAuthLoading(false);
-    });
-  }, []);
-
-  React.useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      navigate("/auth");
-    }
-  }, [isAuthLoading, isAuthenticated, navigate]);
-
-  // ...existing code...
-
-
-  // Show loading while checking authentication
-  if (isAuthLoading) {
-    return (
-      <main className="pt-20">
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-muted-foreground">Loading...</p>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (!isAuthenticated) {
-    // Optionally show a spinner or nothing while redirecting
-    return null;
-  }
-
+  // Queries and mutations always declared at the top
   const { data: posts, isLoading } = useQuery<BlogPost[]>({
     queryKey: ["posts", "user", user?.id],
     queryFn: () => getUserPosts(user!.id),
@@ -104,6 +70,38 @@ export default function Dashboard() {
     },
   });
 
+  React.useEffect(() => {
+    getCurrentUser().then((u: User | null) => {
+      setUser(u);
+      setIsAuthenticated(!!u);
+      setIsAuthLoading(false);
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      navigate("/auth");
+    }
+  }, [isAuthLoading, isAuthenticated, navigate]);
+
+  // Early return for loading or unauthenticated
+  if (isAuthLoading) {
+    return (
+      <main className="pt-20">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // All hooks above, only logic and rendering below
   const handleCreatePost = () => {
     setEditingPost(undefined);
     setShowEditor(true);
@@ -117,6 +115,22 @@ export default function Dashboard() {
   const handleDeletePost = (postId: string) => {
     setDeletingPostId(postId);
   };
+
+
+
+  if (showEditor) {
+    return (
+      <main className="pt-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <PostEditor
+            post={editingPost}
+            onSave={() => setShowEditor(false)}
+            onCancel={() => setShowEditor(false)}
+          />
+        </div>
+      </main>
+    );
+  }
 
   const confirmDelete = () => {
     if (deletingPostId) {
@@ -261,8 +275,12 @@ export default function Dashboard() {
                         <span data-testid={`post-date-${post.id}`}>
                           {new Date(post.createdAt).toLocaleDateString()}
                         </span>
-                        <span>0 views</span>
-                        <span>0 likes</span>
+                        <span style={{ marginLeft: 8 }}>
+                          📨 {post.shares ?? 0}
+                        </span>
+                        <span style={{ marginLeft: 8 }}>
+                          ❤️ {post.likes ?? 0}
+                        </span>
                       </div>
                     </div>
                     
