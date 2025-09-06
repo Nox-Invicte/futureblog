@@ -90,7 +90,16 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form 
+          onSubmit={form.handleSubmit(
+            onSubmit,
+            (errors) => {
+              console.log('[DEBUG] Validation failed', errors);
+              console.log('[DEBUG] Current form values', form.getValues());
+            }
+          )}
+          className="space-y-6"
+        >
           {mode === "signup" && (
             <div>
               <Label className="text-foreground text-sm font-medium">Name</Label>
