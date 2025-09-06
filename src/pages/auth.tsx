@@ -13,7 +13,7 @@ export default function Auth() {
       setIsLoading(false);
     });
   }, []);
-  const [mode, setMode] = useState<"sign-in" | "signup">("sign-in");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
 
   // Redirect if already authenticated (using useEffect to avoid setState during render)
   useEffect(() => {
