@@ -56,9 +56,14 @@ export default function Dashboard() {
     );
   }
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated (in effect)
+  React.useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      navigate("/auth");
+    }
+  }, [isAuthLoading, isAuthenticated, navigate]);
   if (!isAuthenticated) {
-    navigate("/auth");
+    // Optionally show a spinner or nothing while redirecting
     return null;
   }
 
