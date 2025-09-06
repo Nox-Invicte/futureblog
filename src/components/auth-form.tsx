@@ -146,6 +146,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
             className="w-full floating-button"
             disabled={authMutation.isPending}
             data-testid="button-submit"
+            onClick={() => console.log('[DEBUG] Submit button clicked')}
           >
             {authMutation.isPending 
               ? (mode === "signin" ? "Signing In..." : "Creating Account...") 
