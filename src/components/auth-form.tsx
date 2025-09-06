@@ -12,39 +12,46 @@ import { apiRequest } from "../lib/queryClient";
 import { login, signup, getCurrentUser } from "../lib/auth";
 import { useLocation } from "wouter";
 
-const authSchema = z.object({
+
+const signinSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  name: z.string().min(2, "Name must be at least 2 characters").optional(),
 });
 
-type AuthFormData = z.infer<typeof authSchema>;
+const signupSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+});
+
+
+type SigninFormData = z.infer<typeof signinSchema>;
+type SignupFormData = z.infer<typeof signupSchema>;
 
 interface AuthFormProps {
   mode: "signin" | "signup";
   onModeChange: (mode: "signin" | "signup") => void;
 }
 
+
 export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  
-  const form = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      name: "",
-    },
+
+  const form = useForm<any>({
+    resolver: zodResolver(mode === "signup" ? signupSchema : signinSchema),
+    defaultValues: mode === "signup"
+      ? { email: "", password: "", name: "" }
+      : { email: "", password: "" },
   });
 
 
   const authMutation = useMutation({
-    mutationFn: async (data: AuthFormData) => {
+    mutationFn: async (data: any) => {
       if (mode === "signin") {
         await login(data.email, data.password);
       } else {
-        await signup(data.email, data.password, data.name || "");
+        await signup(data.email, data.password, data.name);
       }
     },
     onSuccess: () => {
@@ -64,7 +71,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
   });
 
 
-  const onSubmit = (data: AuthFormData) => {
+  const onSubmit = (data: any) => {
     authMutation.mutate(data);
   };
 
@@ -99,9 +106,9 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
                 className="bg-input border-border focus-visible:ring-ring mt-2"
                 data-testid="input-name"
               />
-              {form.formState.errors.name && (
+              {form.formState.errors.name?.message && (
                 <p className="text-destructive text-sm mt-1">
-                  {form.formState.errors.name.message}
+                  {String(form.formState.errors.name.message)}
                 </p>
               )}
             </div>
@@ -116,9 +123,9 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
               className="bg-input border-border focus-visible:ring-ring mt-2"
               data-testid="input-email"
             />
-            {form.formState.errors.email && (
+            {form.formState.errors.email?.message && (
               <p className="text-destructive text-sm mt-1">
-                {form.formState.errors.email.message}
+                {String(form.formState.errors.email.message)}
               </p>
             )}
           </div>
@@ -132,9 +139,9 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
               className="bg-input border-border focus-visible:ring-ring mt-2"
               data-testid="input-password"
             />
-            {form.formState.errors.password && (
+            {form.formState.errors.password?.message && (
               <p className="text-destructive text-sm mt-1">
-                {form.formState.errors.password.message}
+                {String(form.formState.errors.password.message)}
               </p>
             )}
           </div>
