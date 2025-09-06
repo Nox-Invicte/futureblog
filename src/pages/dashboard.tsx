@@ -52,12 +52,18 @@ export default function Dashboard() {
 
   // Show loading while checking authentication
   if (isAuthLoading) {
-    return (
-      <main className="pt-20">
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+    // Always call hooks, use enabled to control execution
+    const { data: posts, isLoading } = useQuery<BlogPost[]>({
+      queryKey: ["posts", "user", user?.id],
+      queryFn: () => getUserPosts(user!.id),
+      enabled: !!user?.id && isAuthenticated && !isAuthLoading,
+    });
             <p className="mt-2 text-muted-foreground">Loading...</p>
+    const { data: stats, isLoading: statsLoading } = useQuery({
+      queryKey: ["user-stats", user?.id],
+      queryFn: () => getUserStats(user!.id),
+      enabled: !!user?.id && isAuthenticated && !isAuthLoading,
+    });
           </div>
         </div>
       </main>
