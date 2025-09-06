@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "../components/ui/button";
 import { Plus, Search } from "lucide-react";
-import BlogCard from "../components/blog-card";
+import { BlogCard } from "../components/blog-card";
 import HeroSection from "../components/hero-section";
 import CategoriesSection from "../components/categories-section";
 import { getCategoryCounts } from "../lib/categories";
