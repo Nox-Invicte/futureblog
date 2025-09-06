@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,23 +12,13 @@ import { apiRequest } from "../lib/queryClient";
 import { login, signup, getCurrentUser } from "../lib/auth";
 import { useLocation } from "wouter";
 
-const signinSchema = z.object({
+const authSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  name: z.string().optional(),
+  name: z.string().min(2, "Name must be at least 2 characters").optional(),
 });
 
-const signupSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  name: z.string().min(2, "Name must be at least 2 characters"),
-});
-
-type AuthFormData = {
-  email: string;
-  password: string;
-  name?: string;
-};
+type AuthFormData = z.infer<typeof authSchema>;
 
 interface AuthFormProps {
   mode: "signin" | "signup";
@@ -40,7 +30,7 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
   const { toast } = useToast();
   
   const form = useForm<AuthFormData>({
-    resolver: zodResolver(mode === "signup" ? signupSchema : signinSchema),
+    resolver: zodResolver(authSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -48,16 +38,10 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
     },
   });
 
-  // Reset form fields when mode changes to prevent duplicate/missing fields
-  React.useEffect(() => {
-    form.reset({ email: "", password: "", name: "" });
-  }, [mode]);
-
 
   const authMutation = useMutation({
     mutationFn: async (data: AuthFormData) => {
       if (mode === "signin") {
-        console.log('[DEBUG] Sign in button clicked, sending sign in request', data);
         await login(data.email, data.password);
       } else {
         await signup(data.email, data.password, data.name || "");
@@ -81,7 +65,6 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
 
 
   const onSubmit = (data: AuthFormData) => {
-    console.log('[DEBUG] onSubmit called', data);
     authMutation.mutate(data);
   };
 
@@ -100,16 +83,12 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form 
-          onSubmit={form.handleSubmit(
-            onSubmit,
-            (errors) => {
+        <form onSubmit={form.handleSubmit(onSubmit,
+          (errors) => {
               console.log('[DEBUG] Validation failed', errors);
               console.log('[DEBUG] Current form values', form.getValues());
             }
-          )}
-          className="space-y-6"
-        >
+        )} className="space-y-6">
           {mode === "signup" && (
             <div>
               <Label className="text-foreground text-sm font-medium">Name</Label>
@@ -165,7 +144,6 @@ export default function AuthForm({ mode, onModeChange }: AuthFormProps) {
             className="w-full floating-button"
             disabled={authMutation.isPending}
             data-testid="button-submit"
-            onClick={() => console.log('[DEBUG] Submit button clicked')}
           >
             {authMutation.isPending 
               ? (mode === "signin" ? "Signing In..." : "Creating Account...") 
